@@ -1,0 +1,12 @@
+                                                                       QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.42..4.80 rows=20 width=576) (actual time=0.045..0.053 rows=20 loops=1)
+   Buffers: shared hit=5
+   ->  Index Scan using incidents_tenant_status_idx on incidents  (cost=0.42..14387.58 rows=65736 width=576) (actual time=0.044..0.050 rows=20 loops=1)
+         Index Cond: ((organization_id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'::uuid) AND ((status)::text = 'OPEN'::text))
+         Buffers: shared hit=5
+ Planning:
+   Buffers: shared hit=190
+ Planning Time: 1.770 ms
+ Execution Time: 0.088 ms
+(9 rows)

@@ -1,0 +1,74 @@
+name: opsflow-java
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: opsflow
+      POSTGRES_USER: opsflow
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-local-only-password}
+    ports: ["127.0.0.1:5434:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opsflow -d opsflow"]
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7.4-alpine
+    command:
+      [
+        "redis-server",
+        "--maxmemory",
+        "128mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    ports: ["127.0.0.1:6380:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.7
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-local-admin-password}
+      KC_HOSTNAME: http://localhost:8180
+      KC_HEALTH_ENABLED: "true"
+    ports: ["127.0.0.1:8180:8080"]
+    volumes:
+      [
+        "./infra/keycloak:/opt/keycloak/data/import:ro",
+        "keycloak-data:/opt/keycloak/data",
+      ]
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/opsflow
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-local-only-password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:8180/realms/opsflow}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-opsflow-api}
+      OIDC_JWKS: ${OIDC_JWKS:-http://keycloak:8080/realms/opsflow/protocol/openid-connect/certs}
+      CACHE_ENABLED: ${CACHE_ENABLED:-true}
+      CORS_ORIGIN: http://localhost:5174
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      keycloak: { condition: service_started }
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_OIDC_AUTHORITY: ${VITE_OIDC_AUTHORITY:-http://localhost:8180/realms/opsflow}
+        VITE_OIDC_CLIENT_ID: ${VITE_OIDC_CLIENT_ID:-opsflow-web}
+        VITE_OIDC_SCOPE: ${VITE_OIDC_SCOPE:-openid profile email}
+        VITE_OIDC_AUTHORIZATION_AUDIENCE: ${VITE_OIDC_AUTHORIZATION_AUDIENCE:-}
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    ports: ["127.0.0.1:5174:80"]
+    depends_on: [api]
+volumes:
+  postgres-data:
+  keycloak-data:

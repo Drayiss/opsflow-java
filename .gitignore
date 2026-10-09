@@ -1,0 +1,14 @@
+.env
+.env.*.local
+**/target/
+**/node_modules/
+**/dist/
+**/*.tsbuildinfo
+**/test-results/
+**/playwright-report/
+.tools/
+perf/results/*.json
+!perf/results/measured.json
+*.log
+.idea/
+.vscode/
