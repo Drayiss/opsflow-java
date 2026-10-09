@@ -24,6 +24,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identity.id}': {} } }
   properties: {
     managedEnvironmentId: environment.id
+    workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
       ingress: { external: true, targetPort: 80, allowInsecure: false }

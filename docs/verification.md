@@ -60,3 +60,14 @@ Added an Auth0 deployment wrapper that reads the prepared public OIDC profile an
 The user ran the deployment command. PostgreSQL, Redis, Service Bus and its queue, Container Registry, Log Analytics, the Container Apps environment, and the app managed identity were created successfully. The infrastructure deployment failed only on the receiver role assignment: its template contained an incorrect built-in role ID. These existing services can incur charges even though the deployment was marked failed.
 
 Verified the correct Azure Service Bus Data Receiver role ID against the live subscription and Microsoft's role reference: `4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0`. Corrected the template and created the previously failed assignment with the same assignment name. Azure lists both Sender and Receiver roles on the app identity. Recompiled the template. App image publication and Container App deployment remain pending a retry with the user's cloud database password.
+
+## Container Apps environment repair — October 9, 2026
+
+The user's retry completed infrastructure deployment and published both images with tag `20261009021231`. The app deployment then failed because Azure had created an Express environment, which rejects the API and web containers together.
+
+- Added a separate environment module that explicitly selects `WorkloadProfiles` with only the `Consumption` profile, and assigned the app to that profile. The explicit mode uses the current CLI-supported preview API; a targeted Bicep type warning suppression accounts for its missing catalog field.
+- Created `opsflow-standard-environment` against the existing Log Analytics workspace. Azure reports mode `WorkloadProfiles`, provisioning state `Succeeded`, and domain `whiteriver-3fe4479b.westus3.azurecontainerapps.io`.
+- All three Bicep templates compile without diagnostics. Live Azure provider validation passed for both the full infrastructure template and the two-container app against the new environment and published images. Validation used a dummy password and did not deploy the app.
+- Verified that the old Express environment contained no apps, deleted it, and confirmed only the new environment remains. Existing database, cache, broker, registry, and identities are reused. The deployment identity now has AcrPush on the registry.
+
+The app is not yet live. Creating it still requires the user to rerun `scripts/deploy-auth0.ps1` with the same cloud database password. Live Service Bus acceptance and GitHub cloud delivery remain pending.

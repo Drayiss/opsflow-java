@@ -29,18 +29,9 @@ resource logs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   location: location
   properties: { sku: { name: 'PerGB2018' }, retentionInDays: 30 }
 }
-resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
-  name: '${prefix}-environment'
-  location: location
-  properties: {
-    appLogsConfiguration: {
-      destination: 'log-analytics'
-      logAnalyticsConfiguration: {
-        customerId: logs.properties.customerId
-        sharedKey: logs.listKeys().primarySharedKey
-      }
-    }
-  }
+module environment 'environment.bicep' = {
+  name: '${prefix}-standard-environment'
+  params: { location: location, prefix: prefix, logsName: logs.name }
 }
 resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
   name: '${prefix}-${suffix}-db'
@@ -123,10 +114,10 @@ resource receive 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 output registryName string = registry.name
 output registryHost string = registry.properties.loginServer
-output environmentName string = environment.name
+output environmentName string = environment.outputs.environmentName
 output identityName string = identity.name
 output postgresName string = postgres.name
 output redisName string = redis.name
 output serviceBusName string = bus.name
 output appName string = '${prefix}-app'
-output appUrl string = 'https://${prefix}-app.${environment.properties.defaultDomain}'
+output appUrl string = 'https://${prefix}-app.${environment.outputs.defaultDomain}'
