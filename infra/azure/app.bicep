@@ -27,7 +27,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
-      ingress: { external: true, targetPort: 80, allowInsecure: false }
+      ingress: { external: true, targetPort: 8081, allowInsecure: false }
       registries: [{ server: registry.properties.loginServer, identity: identity.id }]
       secrets: [
         { name: 'database-password', value: databasePassword }
@@ -68,7 +68,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           image: '${registry.properties.loginServer}/opsflow-web:${imageTag}'
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
           env: [{ name: 'API_UPSTREAM', value: 'localhost:8080' }]
-          probes: [{ type: 'Readiness', httpGet: { path: '/', port: 80 }, periodSeconds: 10 }]
+          probes: [{ type: 'Readiness', httpGet: { path: '/', port: 8081 }, periodSeconds: 10 }]
         }
       ]
       // One replica keeps the background consumer running and bounds demo compute costs.

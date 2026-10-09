@@ -71,3 +71,13 @@ The user's retry completed infrastructure deployment and published both images w
 - Verified that the old Express environment contained no apps, deleted it, and confirmed only the new environment remains. Existing database, cache, broker, registry, and identities are reused. The deployment identity now has AcrPush on the registry.
 
 The app is not yet live. Creating it still requires the user to rerun `scripts/deploy-auth0.ps1` with the same cloud database password. Live Service Bus acceptance and GitHub cloud delivery remain pending.
+
+## Live app startup and web port repair — October 9, 2026
+
+The next user-run deployment created the Container App and published both images with tag `20261009183820`. Resource provisioning succeeded, but the web container crashed with `bind() to 0.0.0.0:80 failed (13: Permission denied)`. The API started successfully, migrated Azure PostgreSQL, authenticated through its managed identity, and established its Service Bus receiver link.
+
+Changed the web listener, Docker exposed port, Azure ingress target, and web readiness probe to `8081`; local Compose still publishes `5174`. The API remains on `8080`. The frontend production build and Bicep compilation passed. A temporary non-root container with all capabilities dropped and privileged ports restricted returned HTTP 200 at `/callback` with the SPA root. The temporary container was removed.
+
+Published the corrected web image as `20261009-port8081` (digest `sha256:90259d2d27b823a2ab7ba9aca1b244b7bc501dc928a9ec5869f7ba4a407ed809`) and updated the existing app while preserving its API image and credentials. Revision `opsflow-app--0000001` is `Healthy`; both containers are running and ready without restarts. The public endpoint `https://opsflow-app.whiteriver-3fe4479b.westus3.azurecontainerapps.io/api/health` returns `{"status":"UP"}`. The deployment script now polls that public endpoint before reporting readiness; its PowerShell syntax check passed.
+
+The public home and callback routes return HTTP 200 with the SPA root, and an unauthenticated request to `/api/organizations` returns HTTP 401. Auth0 needs the hosted callback/logout/origin allowlist entries before cloud sign-in acceptance. Live notification delivery, DLQ/retry/idempotency acceptance, and GitHub cloud delivery are still pending; establishing a receiver link alone does not prove those behaviors.

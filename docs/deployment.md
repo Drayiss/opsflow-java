@@ -54,7 +54,9 @@ $env:OPSFLOW_DATABASE_PASSWORD = '<strong-unique-password>'
   -OidcScope 'openid profile email offline_access api://<api-client-id>/access_as_user'
 ```
 
-The script provisions infrastructure, signs Docker into ACR using your Azure login, builds and pushes two versioned images, and provisions the Container App. The app identity receives ACR pull plus Service Bus sender/receiver access. Service Bus local/SAS authentication is disabled. Database and Redis credentials are stored in Container Apps secrets and connections use TLS.
+The script provisions infrastructure, signs Docker into ACR using your Azure login, builds and pushes two versioned images, and provisions the Container App. It then waits for the public API health endpoint to return `UP` before reporting readiness. The app identity receives ACR pull plus Service Bus sender/receiver access. Service Bus local/SAS authentication is disabled. Database and Redis credentials are stored in Container Apps secrets and connections use TLS.
+
+The web container listens on port `8081` so it runs without privileged-port capabilities in Azure; the API uses `8080`. Azure ingress and the web readiness probe target `8081`. Local Compose still exposes the browser app at `http://localhost:5174`.
 
 The environment module explicitly selects **WorkloadProfiles** with only the **Consumption** profile, and the app selects that profile. This supports the API and web containers together. Express environments do not support this arrangement; the explicit mode uses the current preview API field supported by Azure CLI, with a documented suppression for the lagging Bicep property catalog. The environment is named `<prefix>-standard-environment` so an earlier Express environment cannot be accidentally reused.
 

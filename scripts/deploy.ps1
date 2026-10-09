@@ -33,6 +33,19 @@ try {
     foreach($taskKey in @('registryName','environmentName','identityName','postgresName','redisName','serviceBusName','appName')) { $taskParams[$taskKey]=@{value=$taskValues.$taskKey.value} }
     @{ '$schema'='https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#';contentVersion='1.0.0.0';parameters=$taskParams } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $taskAppFile
     Invoke-Checked az @('deployment','group','create','--name','opsflow-app','--resource-group',$ResourceGroup,'--template-file','infra/azure/app.bicep','--parameters',"@$taskAppFile",'--query','properties.outputs.url.value','-o','tsv')
+    Write-Host 'Waiting for the public API to become healthy...'
+    $taskReady = $false
+    for ($taskAttempt = 0; $taskAttempt -lt 30; $taskAttempt++) {
+        try {
+            $taskHealth = Invoke-RestMethod -Uri "$($taskValues.appUrl.value)/api/health" -TimeoutSec 10
+            if ($taskHealth.status -eq 'UP') { $taskReady = $true; break }
+        } catch {
+            # The first revision may still be starting; retry the public endpoint.
+        }
+        Start-Sleep -Seconds 5
+    }
+    if (-not $taskReady) { throw 'The app was provisioned but its public API is not healthy. Check Container Apps startup logs before continuing.' }
+    Write-Host 'Public API health: UP'
     Write-Host "Register $($taskValues.appUrl.value)/callback as a SPA redirect URI in your identity provider."
 } finally {
     # Only delete the two exact temporary files created by this invocation.

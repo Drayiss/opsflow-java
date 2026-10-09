@@ -67,7 +67,7 @@ services:
         VITE_OIDC_SCOPE: ${VITE_OIDC_SCOPE:-openid profile email}
         VITE_OIDC_AUTHORIZATION_AUDIENCE: ${VITE_OIDC_AUTHORIZATION_AUDIENCE:-}
         VITE_API_URL: ${VITE_API_URL:-/api}
-    ports: ["127.0.0.1:5174:80"]
+    ports: ["127.0.0.1:5174:8081"]
     depends_on: [api]
 volumes:
   postgres-data:
