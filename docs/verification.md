@@ -48,3 +48,9 @@ The user subsequently reported that Auth0 sign-in worked. Refresh rotation, sign
 - Created `opsflow-deploy-identity`, configured federation for `repo:Drayiss/opsflow-java:environment:production`, and assigned Container Apps Contributor on the dedicated resource group. ACR push permission is pending registry creation.
 
 Only the resource group and deployment identity have been created. Paid services, actual deployment, Azure Service Bus acceptance, and GitHub delivery remain pending. Provider validation is not proof of successful resource creation or live notification delivery.
+
+## GitHub verification — October 9, 2026
+
+Uploaded the initial implementation to `Drayiss/opsflow-java`. The [Verify workflow](https://github.com/Drayiss/opsflow-java/actions/runs/37885324583) passed for commit `dabeb30e3e933995b7508346f6ab171841a2240b`, including backend tests, frontend compilation, Docker builds, demo seeding, and three real Keycloak browser checks on the hosted Ubuntu runner. The Azure deployment workflow was skipped because cloud delivery is not enabled.
+
+Added an Auth0 deployment wrapper that reads the prepared public OIDC profile and prompts locally for a cloud database password. Its syntax, dry run, parameter forwarding, and password-environment restoration on success/failure were checked without contacting Azure. This does not constitute a live service deployment.

@@ -45,6 +45,15 @@ This uses `.env` and Compose defaults. If `.env` was changed to Auth0, restore i
 
 Use the same issuer, JWKS, API audience, SPA client ID, and scopes with `scripts/deploy.ps1`. For Auth0, also pass `-OidcAuthorizationAudience 'https://opsflow-api'` and `-OidcScope 'openid profile email offline_access access_as_user'`. Before provisioning, follow the region, permission, and cost checks in [the deployment guide](deployment.md).
 
+With `.env.auth0.local` prepared, the wrapper supplies those settings automatically:
+
+```powershell
+./scripts/deploy-auth0.ps1 -WhatIf
+./scripts/deploy-auth0.ps1
+```
+
+The first command previews the action without contacting Azure or prompting for a password. The second provisions paid services in `westus3` and prompts for a strong cloud database password if `OPSFLOW_DATABASE_PASSWORD` is not already set. Save that password for later updates. The wrapper does not use the local demonstration database password. Run the deployment command when ready to begin the cloud demo; resources continue billing until removed.
+
 After provisioning, add the final HTTPS app origin and its `/callback` URL to Auth0's allowed URLs. Keep localhost entries if you want to continue testing locally. For GitHub Actions, set `OIDC_AUTHORIZATION_AUDIENCE=https://opsflow-api` and the full `OIDC_SCOPE` above. These are public configuration values; Azure deployment authentication is configured separately from Auth0 user sign-in.
 
 ## Troubleshooting
