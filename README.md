@@ -1,6 +1,6 @@
 # OpsFlow
 
-A compact multi-tenant incident management platform built with Java 21, Spring Boot, Spring Security, React, TypeScript, PostgreSQL, Redis, Azure Service Bus, Docker, and GitHub Actions.
+A compact multi-tenant incident management platform built with Java 25, Spring Boot, Spring Security, React, TypeScript, PostgreSQL, Redis, Azure Service Bus, Docker, and GitHub Actions.
 
 One API handles organizations, incidents, activity, memberships, and notifications. The browser signs in through an OIDC provider using authorization code + PKCE. PostgreSQL is the source of truth; Redis accelerates dashboard summaries. Durable outbox events deliver in-app notifications through a local background worker or Azure Service Bus.
 
@@ -54,7 +54,7 @@ Dashboard summaries use tenant-specific Redis keys with a 15-second TTL and evic
 
 ## Verify
 
-Java 21 and Node 24 are needed for source development; Maven is downloaded by the included wrapper. Docker must be running for PostgreSQL integration tests.
+Java 25 and Node 24 are needed for source development; Maven is downloaded by the included wrapper. Docker must be running for PostgreSQL integration tests.
 
 ```powershell
 cd backend

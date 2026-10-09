@@ -81,3 +81,15 @@ Changed the web listener, Docker exposed port, Azure ingress target, and web rea
 Published the corrected web image as `20261009-port8081` (digest `sha256:90259d2d27b823a2ab7ba9aca1b244b7bc501dc928a9ec5869f7ba4a407ed809`) and updated the existing app while preserving its API image and credentials. Revision `opsflow-app--0000001` is `Healthy`; both containers are running and ready without restarts. The public endpoint `https://opsflow-app.whiteriver-3fe4479b.westus3.azurecontainerapps.io/api/health` returns `{"status":"UP"}`. The deployment script now polls that public endpoint before reporting readiness; its PowerShell syntax check passed.
 
 The public home and callback routes return HTTP 200 with the SPA root, and an unauthenticated request to `/api/organizations` returns HTTP 401. Auth0 needs the hosted callback/logout/origin allowlist entries before cloud sign-in acceptance. Live notification delivery, DLQ/retry/idempotency acceptance, and GitHub cloud delivery are still pending; establishing a receiver link alone does not prove those behaviors.
+
+## Java 25 migration — October 9, 2026
+
+Changed the Maven release target, API Docker build/runtime images, both GitHub Actions Java setups, and the source-development requirements to Java 25. Spring Boot 3.5.16 officially supports Java 25; application dependencies and behavior remain unchanged.
+
+- A clean Maven verification under Temurin `25.0.4.1` passed all 14 tests with zero failures, errors, or skips, using real PostgreSQL and Redis containers. The application was packaged successfully.
+- Both Compose images built successfully. All three browser tests passed against the Java 25 API with real Keycloak authentication, covering incident workflows, activity/notifications, tenant screens, and responder restrictions.
+- Restored the local Auth0 configuration after browser verification. Its public local readiness endpoint returns `UP`, and the API reports Temurin `25.0.4.1`.
+- Published API image `20261009-java25`, digest `sha256:039f01ef2abdcef70138888b9071392489afd64028315dd97b4cea36a17a6d3f`, and updated the existing Azure app. Revision `opsflow-app--0000002` is `Healthy`; its startup log explicitly reports Java `25.0.4.1`, successful startup, and an authenticated Service Bus receiver link. Public API readiness returns `UP`. The web image, credential references, and existing infrastructure are preserved.
+- The official Windows Temurin 25 installer has been downloaded and its hash verified. At this point it is waiting at the Windows administrator approval prompt; the native Windows JDK installation is not yet confirmed.
+
+The October 8 performance report remains a measurement of the Java 21 build. It has not been rerun on Java 25 and is labeled accordingly. Cloud login/notification acceptance and automatic GitHub Azure delivery remain separate pending checks.

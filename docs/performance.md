@@ -2,6 +2,8 @@
 
 Measured October 8, 2026 on local Docker Desktop, using **50 simulated concurrent users** and **200,000 incidents**. Median p95 dashboard API latency fell from **239.96 ms to 2.29 ms**, a **99.05% reduction**. All requests succeeded in the final six runs.
 
+These measurements used Java 21 before the project's Java 25 migration. They remain evidence for that recorded build; the benchmark has not yet been repeated on Java 25.
+
 | Run | Redis disabled p95 | Redis enabled p95 |
 |---|---|---|
 | 1 | 249.80 ms | 2.50 ms |
