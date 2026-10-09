@@ -54,3 +54,9 @@ Only the resource group and deployment identity have been created. Paid services
 Uploaded the initial implementation to `Drayiss/opsflow-java`. The [Verify workflow](https://github.com/Drayiss/opsflow-java/actions/runs/37885324583) passed for commit `dabeb30e3e933995b7508346f6ab171841a2240b`, including backend tests, frontend compilation, Docker builds, demo seeding, and three real Keycloak browser checks on the hosted Ubuntu runner. The Azure deployment workflow was skipped because cloud delivery is not enabled.
 
 Added an Auth0 deployment wrapper that reads the prepared public OIDC profile and prompts locally for a cloud database password. Its syntax, dry run, parameter forwarding, and password-environment restoration on success/failure were checked without contacting Azure. This does not constitute a live service deployment.
+
+## Initial live infrastructure deployment and role repair — October 9, 2026
+
+The user ran the deployment command. PostgreSQL, Redis, Service Bus and its queue, Container Registry, Log Analytics, the Container Apps environment, and the app managed identity were created successfully. The infrastructure deployment failed only on the receiver role assignment: its template contained an incorrect built-in role ID. These existing services can incur charges even though the deployment was marked failed.
+
+Verified the correct Azure Service Bus Data Receiver role ID against the live subscription and Microsoft's role reference: `4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0`. Corrected the template and created the previously failed assignment with the same assignment name. Azure lists both Sender and Receiver roles on the app identity. Recompiled the template. App image publication and Container App deployment remain pending a retry with the user's cloud database password.

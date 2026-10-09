@@ -1,6 +1,6 @@
 # Deploy to Azure
 
-Live service deployment is a user-run step. The implementation workspace has prepared an `opsflow-demo` resource group and a separate GitHub deployment managed identity, but no paid application, database, cache, broker, registry, or logging services have been provisioned. Bicep compilation and provider validation do not prove live networking or cloud delivery.
+Run the provisioning script when ready to begin the cloud demo. It creates paid services, which continue billing after a partially failed deployment. Retrying with the same resource group and prefix reuses the existing resource names. Keep the cloud database password available for retries and later updates. Bicep compilation and provider validation do not prove live networking or cloud delivery; see the [verification record](verification.md) for deployment evidence.
 
 ## Prerequisites
 

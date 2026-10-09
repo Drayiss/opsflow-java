@@ -118,7 +118,7 @@ resource receive 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   properties: {
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4f6d3b9b-027b-4f4c-9142-0e3f5e9679cc')
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0')
   }
 }
 output registryName string = registry.name
