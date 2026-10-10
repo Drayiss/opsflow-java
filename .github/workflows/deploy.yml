@@ -42,6 +42,25 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+      - name: Check deployment configuration
+        shell: pwsh
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          AZURE_APP_NAME: ${{ vars.AZURE_APP_NAME }}
+          ACR_NAME: ${{ vars.ACR_NAME }}
+          OIDC_ISSUER: ${{ vars.OIDC_ISSUER }}
+          OIDC_CLIENT_ID: ${{ vars.OIDC_CLIENT_ID }}
+          OIDC_SCOPE: ${{ vars.OIDC_SCOPE }}
+          OIDC_AUTHORIZATION_AUDIENCE: ${{ vars.OIDC_AUTHORIZATION_AUDIENCE }}
+        run: |
+          $required = @('AZURE_CLIENT_ID', 'AZURE_TENANT_ID', 'AZURE_SUBSCRIPTION_ID', 'AZURE_RESOURCE_GROUP', 'AZURE_APP_NAME', 'ACR_NAME', 'OIDC_ISSUER', 'OIDC_CLIENT_ID', 'OIDC_SCOPE')
+          if ($env:OIDC_ISSUER -match '\.auth0\.com/') { $required += 'OIDC_AUTHORIZATION_AUDIENCE' }
+          $missing = @($required | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) })
+          if ($missing.Count) { throw "Missing GitHub production environment variables: $($missing -join ', '). Add them under Settings > Environments > production before rerunning this workflow." }
+          Write-Output 'Deployment configuration is complete.'
       - uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}

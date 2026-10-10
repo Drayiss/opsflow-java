@@ -93,3 +93,5 @@ Changed the Maven release target, API Docker build/runtime images, both GitHub A
 - The official Windows Temurin 25 installer has been downloaded and its hash verified. At this point it is waiting at the Windows administrator approval prompt; the native Windows JDK installation is not yet confirmed.
 
 The October 8 performance report remains a measurement of the Java 21 build. It has not been rerun on Java 25 and is labeled accordingly. Cloud login/notification acceptance and automatic GitHub Azure delivery remain separate pending checks.
+
+The Windows installer subsequently completed successfully. Windows machine `JAVA_HOME` and a freshly loaded Windows `PATH` select Temurin `25.0.4.1`; both `java` and `javac` report that version, and the Maven wrapper reports Java `25.0.4.1`. The [Java 25 GitHub verification run](https://github.com/Drayiss/opsflow-java/actions/runs/38004205436) passed.
