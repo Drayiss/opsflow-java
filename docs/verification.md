@@ -107,3 +107,9 @@ Both corrected delivery runs succeeded: [first complete delivery](https://github
 Direct Azure verification confirms `opsflow-app--0000004` is the latest ready revision and is `Healthy`. Both API and web images use commit `95b0ae5f05157771636c8e9157a4ed3b4f0d0c7c`; replica limits remain exactly one. The public API returns `{"status":"UP"}` at `https://opsflow-app.whiteriver-3fe4479b.westus3.azurecontainerapps.io/api/health`.
 
 The hosted sign-in button reaches the normal Auth0 **OpsFlow Web** login page, confirming its hosted callback URL is accepted. A separate cookie-free request to Auth0's OIDC logout endpoint with the SPA client ID and hosted return origin returned HTTP 302 to the hosted app, confirming the logout return URL is accepted. These checks did not authenticate as a user, exchange tokens, or verify actual session termination. Cloud user/token-renewal/tenant/RBAC acceptance and live notification/DLQ/retry/idempotency acceptance remain pending an application user session.
+
+## User-reported live notification acceptance — October 10, 2026
+
+After following the hosted application sign-in and incident acceptance steps, the user reported seeing the inbox notification. This records user-observed success for the normal live notification flow in the Azure deployment, alongside the independently verified healthy revision and successful GitHub delivery above. No user access token or password was collected, and no screenshot or database inspection was used to independently verify this report.
+
+This does not establish delivery to every organization member or live failure-handling behavior. Auth0 sign-out/token renewal, cross-organization access and role restrictions on the hosted app, and Service Bus dead-lettering, transient retries, and duplicate replay remain separate acceptance checks. Local automated coverage for tenant isolation, roles, and consumer handling is recorded above.
