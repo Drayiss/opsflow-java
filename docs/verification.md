@@ -120,6 +120,8 @@ The user also confirmed the two-account organization separation check: the secon
 
 The user confirmed that adding the second account as a Viewer allowed reading incidents in the original organization while withholding incident creation/modification and membership administration controls. This records user-observed hosted Viewer behavior; direct REST mutation rejection remains covered by local integration tests, rather than this UI check.
 
+The user subsequently confirmed the hosted Responder check: the second account could create an incident, acknowledge it, and resolve it, while remaining unable to administer members, roles, or the organization name. This records the expected separation between Viewer, Responder, and Administrator controls in the hosted UI. Direct authenticated foreign-tenant requests and role-denied REST mutations have not been exercised in the hosted deployment; local integration tests cover those server-side restrictions. Live broker dead-letter, retry, and duplicate replay acceptance checks remain pending.
+
 ## Organization creator display-name repair — October 10, 2026
 
 The user noticed a Google OIDC subject being displayed as a member name. Organization creation previously fell back to the access token's subject when its `name` claim was missing, as is common with Auth0 API access tokens. The browser now supplies a bounded display label from its OIDC profile; the API stores that optional label and uses a readable administrator label when no profile name is available. Membership ownership and authorization still use only the validated access token's subject. Existing stored names can be edited through the administrator's existing member form using the same subject and role.
