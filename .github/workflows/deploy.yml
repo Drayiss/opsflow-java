@@ -3,6 +3,13 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - backend/**
+      - frontend/**
+      - infra/**
+      - compose.yml
+      - scripts/seed-demo.ps1
+      - .github/workflows/deploy.yml
 permissions:
   contents: read
   id-token: write

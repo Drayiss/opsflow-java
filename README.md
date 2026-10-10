@@ -84,7 +84,7 @@ See [performance report](docs/performance.md) for the actual measurements and pr
 
 Follow [deployment guide](docs/deployment.md). Bicep provisions Azure Container Registry, Container Apps, PostgreSQL Flexible Server, Azure Managed Redis, Service Bus, managed identity permissions, and Log Analytics. A single Container App runs the API and web containers; the web container proxies requests to the API over localhost. The browser and API share one public HTTPS origin. One replica remains active so the notification worker runs without web traffic.
 
-The verification workflow runs backend tests, the frontend build, and browser tests. The deployment workflow tests before publishing immutable Git SHA images and creating a revision, then verifies the public readiness endpoint. Azure delivery runs on `main` pushes and manual runs using the configured `production` environment and existing demo registry. Set the repository variable `AZURE_ENABLED=false` to suspend delivery; set `ACR_NAME` to override the current registry when deploying your own infrastructure.
+The verification workflow runs backend tests, the frontend build, and browser tests. The deployment workflow tests before publishing immutable Git SHA images and creating a revision, then verifies the public readiness endpoint. Azure delivery runs on `main` pushes that change application or deployment files, and on manual runs, using the configured `production` environment and existing demo registry. Set the repository variable `AZURE_ENABLED=false` to suspend delivery; set `ACR_NAME` to override the current registry when deploying your own infrastructure.
 
 ## Documentation
 

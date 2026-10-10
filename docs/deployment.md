@@ -66,9 +66,9 @@ Azure Managed Redis B0 and PostgreSQL B1ms are small demo tiers, not a high-avai
 
 ## GitHub Actions delivery
 
-Push this repository to GitHub with `main` as the deployment branch. Verification runs for pushes and pull requests. Cloud delivery runs on `main` pushes and manual runs; set the repository variable `AZURE_ENABLED=false` to suspend it. The workflow updates existing infrastructure and does not create additional database, cache, or broker services.
+Push this repository to GitHub with `main` as the deployment branch. Verification runs for pushes and pull requests. Cloud delivery runs on `main` pushes that change application/deployment files, and on manual runs; documentation-only changes do not publish another release. Set the repository variable `AZURE_ENABLED=false` to suspend it. The workflow updates existing infrastructure and does not create additional database, cache, or broker services.
 
-Create a GitHub `production` environment. Use a separate **user-assigned managed identity** for deployment, which can be created through Azure Resource Manager without manually registering an Entra application. Add a federated identity credential with issuer `https://token.actions.githubusercontent.com`, subject `repo:<owner>/<repo>:environment:production`, and audience `api://AzureADTokenExchange`. Give the deployment identity ACR **AcrPush** on this registry and **Container Apps Contributor** on the app/resource group. The job reads and preserves existing Container Apps secret references; allow the app's `listSecrets` operation through that role. No Azure client secret is required. The application's existing managed identity remains dedicated to image pulls and Service Bus access.
+Create a GitHub `production` environment. Use a separate **user-assigned managed identity** for deployment, which can be created through Azure Resource Manager without manually registering an Entra application. Add a federated identity credential with issuer `https://token.actions.githubusercontent.com`, the exact repository/environment subject, and audience `api://AzureADTokenExchange`. GitHub repositories created after July 15, 2026 include immutable owner and repository IDs: `repo:<owner>@<owner-id>/<repo>@<repo-id>:environment:production`. Older repositories can use the legacy name-only format. For this repository, the verified subject is `repo:Drayiss@139669637/opsflow-java@1411291818:environment:production`. Give the deployment identity ACR **AcrPush** on this registry and **Container Apps Contributor** on the app/resource group. The job reads and preserves existing Container Apps secret references; allow the app's `listSecrets` operation through that role. No Azure client secret is required. The application's existing managed identity remains dedicated to image pulls and Service Bus access.
 
 After infrastructure exists, create the deployment identity and trust (replace the repository placeholders):
 
@@ -79,7 +79,7 @@ az identity federated-credential create `
   --identity-name opsflow-deploy-identity `
   --name github-production `
   --issuer 'https://token.actions.githubusercontent.com' `
-  --subject 'repo:<owner>/<repo>:environment:production' `
+  --subject 'repo:<owner>@<owner-id>/<repo>@<repo-id>:environment:production' `
   --audiences 'api://AzureADTokenExchange'
 ```
 

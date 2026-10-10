@@ -95,3 +95,11 @@ Changed the Maven release target, API Docker build/runtime images, both GitHub A
 The October 8 performance report remains a measurement of the Java 21 build. It has not been rerun on Java 25 and is labeled accordingly. Cloud login/notification acceptance and automatic GitHub Azure delivery remain separate pending checks.
 
 The Windows installer subsequently completed successfully. Windows machine `JAVA_HOME` and a freshly loaded Windows `PATH` select Temurin `25.0.4.1`; both `java` and `javac` report that version, and the Maven wrapper reports Java `25.0.4.1`. The [Java 25 GitHub verification run](https://github.com/Drayiss/opsflow-java/actions/runs/38004205436) passed.
+
+## Automatic cloud delivery preparation — October 9, 2026
+
+Enabled delivery using the existing nine GitHub `production` environment variables and the verified registry default. `AZURE_ENABLED=false` remains an off switch. Application/deployment file changes trigger delivery; documentation-only updates do not. Added configuration checks and a final readiness check requiring both commit-tagged images, a healthy latest/ready revision, and public API status `UP`.
+
+The first enabled [deployment run](https://github.com/Drayiss/opsflow-java/actions/runs/38007663209) passed verification but Azure sign-in failed with `AADSTS700213`. GitHub's assertion used its new immutable repository subject. Confirmed owner ID `139669637` and repository ID `1411291818` through GitHub's public API, then updated the existing Azure federation record to `repo:Drayiss@139669637/opsflow-java@1411291818:environment:production`. Issuer, audience, identity, and Azure role scopes remain the same. Azure reports the corrected exact subject. This matches [GitHub's immutable subject reference](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims).
+
+The corrected pipeline is being verified against Azure. Auth0 hosted URL settings and cloud user/notification acceptance still require an authenticated dashboard/application session.
