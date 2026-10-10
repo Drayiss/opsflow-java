@@ -89,7 +89,12 @@ function App() {
     const form = event.currentTarget;
     const name = String(new FormData(form).get("name"));
     try {
-      const org = await api<Org>("/organizations", "POST", { name });
+      const profile = user?.profile;
+      const displayName = String(
+        profile?.name || profile?.preferred_username || profile?.nickname ||
+          profile?.email || "Organization administrator",
+      ).trim().slice(0, 120);
+      const org = await api<Org>("/organizations", "POST", { name, displayName });
       await loadOrgs();
       setTenant(org.id);
       form.reset();

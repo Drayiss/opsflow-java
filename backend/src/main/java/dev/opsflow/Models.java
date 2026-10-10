@@ -12,6 +12,8 @@ public final class Models {
     public enum Status { OPEN, ACKNOWLEDGED, RESOLVED }
     public record Organization(UUID id, String name, Role role) {}
     public record OrganizationInput(@NotBlank @Size(max=120) String name) {}
+    public record OrganizationCreateInput(@NotBlank @Size(max=120) String name,
+                                          @Size(max=120) String displayName) {}
     public record Member(String subject, String displayName, Role role) {}
     public record MemberInput(@NotBlank @Size(max=200) String subject,
                               @NotBlank @Size(max=120) String displayName, @NotNull Role role) {}

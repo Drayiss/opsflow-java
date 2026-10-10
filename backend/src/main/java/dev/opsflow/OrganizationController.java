@@ -25,10 +25,14 @@ class OrganizationController {
     @PostMapping
     @ResponseStatus(CREATED)
     @Transactional
-    Organization create(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody OrganizationInput input) {
+    Organization create(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody OrganizationCreateInput input) {
         var id=UUID.randomUUID();
         db.update("INSERT INTO organizations(id,name) VALUES (?,?)",id,input.name().trim());
-        String name=Optional.ofNullable(jwt.getClaimAsString("name")).orElse(jwt.getSubject());
+        // Display labels may come from the browser's OIDC profile; identity always comes from the validated access token.
+        String name=input.displayName();
+        if (name==null || name.isBlank()) name=jwt.getClaimAsString("name");
+        if (name==null || name.isBlank() || name.equals(jwt.getSubject())) name="Organization administrator";
+        name=name.trim();
         db.update("INSERT INTO memberships(organization_id,subject,display_name,role) VALUES (?,?,?,'ADMIN')",id,jwt.getSubject(),name.substring(0,Math.min(120,name.length())));
         return new Organization(id,input.name().trim(),Role.ADMIN);
     }

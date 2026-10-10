@@ -88,6 +88,24 @@ class PlatformIntegrationTest {
         http.perform(get("/api/organizations")).andExpect(status().isUnauthorized());
         http.perform(get("/api/organizations").header("Authorization","Bearer not-a-jwt")).andExpect(status().isUnauthorized());
     }
+    @Test void organizationCreatorLabelDoesNotRequireNameInAccessTokenOrChangeIdentity() throws Exception {
+        String subject="google-oauth2|synthetic-user";
+        var response=http.perform(post("/api/organizations").with(jwt().jwt(j->j.subject(subject)))
+            .contentType("application/json").content("{\"name\":\"Profile label\",\"displayName\":\"Nolan\",\"subject\":\"someone-else\"}"))
+            .andExpect(status().isCreated()).andReturn();
+        String id=json.readTree(response.getResponse().getContentAsString()).get("id").asText();
+        http.perform(get("/api/organizations/"+id+"/members").with(jwt().jwt(j->j.subject(subject))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].displayName").value("Nolan"))
+            .andExpect(jsonPath("$[0].subject").value(subject)).andExpect(jsonPath("$[0].role").value("ADMIN"));
+        http.perform(get("/api/organizations/"+id+"/members").with(as("someone-else")))
+            .andExpect(status().isNotFound());
+        var fallback=http.perform(post("/api/organizations").with(jwt().jwt(j->j.subject(subject)))
+            .contentType("application/json").content("{\"name\":\"Missing profile label\"}"))
+            .andExpect(status().isCreated()).andReturn();
+        String fallbackId=json.readTree(fallback.getResponse().getContentAsString()).get("id").asText();
+        http.perform(get("/api/organizations/"+fallbackId+"/members").with(jwt().jwt(j->j.subject(subject))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$[0].displayName").value("Organization administrator"));
+    }
     String signed(String issuer,String audience,Instant expires,RSAKey key) throws Exception {
         var token=new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("test-key").build(),
             new JWTClaimsSet.Builder().subject("alice").issuer(issuer).audience(audience).issueTime(Date.from(Instant.now().minusSeconds(600)))
