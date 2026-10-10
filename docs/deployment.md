@@ -66,7 +66,7 @@ Azure Managed Redis B0 and PostgreSQL B1ms are small demo tiers, not a high-avai
 
 ## GitHub Actions delivery
 
-Push this repository to GitHub with `main` as the deployment branch. Verification runs for pushes and pull requests. Cloud delivery stays disabled until `AZURE_ENABLED=true` is set.
+Push this repository to GitHub with `main` as the deployment branch. Verification runs for pushes and pull requests. Cloud delivery runs on `main` pushes and manual runs; set the repository variable `AZURE_ENABLED=false` to suspend it. The workflow updates existing infrastructure and does not create additional database, cache, or broker services.
 
 Create a GitHub `production` environment. Use a separate **user-assigned managed identity** for deployment, which can be created through Azure Resource Manager without manually registering an Entra application. Add a federated identity credential with issuer `https://token.actions.githubusercontent.com`, subject `repo:<owner>/<repo>:environment:production`, and audience `api://AzureADTokenExchange`. Give the deployment identity ACR **AcrPush** on this registry and **Container Apps Contributor** on the app/resource group. The job reads and preserves existing Container Apps secret references; allow the app's `listSecrets` operation through that role. No Azure client secret is required. The application's existing managed identity remains dedicated to image pulls and Service Bus access.
 
@@ -87,17 +87,17 @@ Use its `clientId` for `AZURE_CLIENT_ID` and its `principalId` for the two Azure
 
 Configure repository/environment variables:
 
-Set `AZURE_ENABLED` as a **repository** variable so the verification job can read it before entering the production environment. The remaining deployment values can be repository or production-environment variables.
+If using the delivery off switch, set `AZURE_ENABLED` as a **repository** variable so the verification job can read it before entering the production environment. The remaining deployment values can be repository or production-environment variables. This repository defaults `ACR_NAME` to the verified existing demo registry `opsfloweq2v4r3kbxzmm`; override it when using a different registry. The deployment job checks for missing configuration before Azure login.
 
 | Variable                | Value                                       |
 | ----------------------- | ------------------------------------------- |
-| `AZURE_ENABLED`         | `true`                                      |
+| `AZURE_ENABLED`         | Optional: `false` suspends delivery; unset or `true` enables it |
 | `AZURE_CLIENT_ID`       | Deployment managed identity client ID       |
 | `AZURE_TENANT_ID`       | Entra tenant ID                             |
 | `AZURE_SUBSCRIPTION_ID` | Subscription ID                             |
 | `AZURE_RESOURCE_GROUP`  | Resource group used above                   |
 | `AZURE_APP_NAME`        | Bicep output appName, usually `opsflow-app` |
-| `ACR_NAME`              | Bicep output registryName                   |
+| `ACR_NAME`              | Optional override of the current demo registry; use your Bicep output registryName |
 | `OIDC_ISSUER`           | Same issuer used by the API                 |
 | `OIDC_CLIENT_ID`        | Browser SPA client ID                       |
 | `OIDC_SCOPE`            | Full OIDC + API scope string                |
