@@ -139,3 +139,9 @@ The [updated Verify run](https://github.com/Drayiss/opsflow-java/actions/runs/38
 Direct Azure checks confirm revision `opsflow-app--0000006` is the latest ready revision and `Healthy`, both container images use commit `f7b5fb106b7f87584c9372b0533fe7cebcde85f6`, and public API status is `UP`. These workflow maintenance changes do not establish the still-pending live broker failure/replay checks.
 
 References: [setup-java maintained versions](https://github.com/actions/setup-java), [setup-node maintained versions](https://github.com/actions/setup-node), [Ubuntu runner migration](https://github.com/actions/runner-images/issues/14748).
+
+## User-reported live invalid-event dead-letter acceptance — October 10, 2026
+
+After configuring their own queue access through Azure's portal, the user sent the deliberately invalid event `{"test":"invalid-event"}` to `incident-events` and confirmed the expected dead-letter reason in Service Bus Explorer. This records user-observed `InvalidEvent` handling by the live consumer. A separate Azure management-plane read corroborates one dead-letter message and zero active messages, with the queue `Active`, duplicate detection enabled, and maximum delivery count five. That count read does not independently inspect the message body or reason, and no messages were received, removed, or purged by the agent.
+
+The agent did not change the user's queue permissions; an attempted automatic assignment was rejected before execution, and the user elected to configure access themselves. Transient failure/retry behavior and duplicate replay of a valid processed event remain separate live checks. Delivery to both test accounts after adding the second account to the organization is also still pending confirmation.
