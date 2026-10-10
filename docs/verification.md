@@ -129,3 +129,13 @@ The user noticed a Google OIDC subject being displayed as a member name. Organiz
 All 15 backend tests passed on Java 25 with real PostgreSQL/Redis containers. The regression check uses an access token without a name claim, verifies the readable stored label and fallback, and verifies that a supplied foreign subject cannot change the authenticated creator's identity or grant the foreign subject access. TypeScript/Vite production compilation passed. The [display-name delivery workflow](https://github.com/Drayiss/opsflow-java/actions/runs/38091131194) completed both verification (including the browser tests) and Azure deployment successfully.
 
 Direct Azure checks confirm revision `opsflow-app--0000005` is the latest ready revision and `Healthy`, both container images use commit `5f162e04c848399505304954095c08e2b20b68d7`, and the public API returns `UP`. No existing cloud display-name records were rewritten; the administrator can correct those labels using the existing member form.
+
+## GitHub Actions runtime maintenance — October 10, 2026
+
+The user reported Node.js 20 action-runtime warnings, the setup-java v4 deprecation, and GitHub's upcoming `ubuntu-latest` migration notice in a successful verification run. Updated checkout to v7, setup-java to v6, setup-node to v7, and upload-artifact to v7. Updated Azure login to v3, Docker Buildx setup to v4, and Docker image build/push to v7. Verified each selected major tag exists in its official repository and its `action.yml` declares Node.js 24. Both workflows now select `ubuntu-24.04` explicitly. Application build versions remain Java 25 and Node.js 24.
+
+The [updated Verify run](https://github.com/Drayiss/opsflow-java/actions/runs/38092348716) passed with zero check annotations. The [updated deployment workflow](https://github.com/Drayiss/opsflow-java/actions/runs/38092348708) passed verification and Azure delivery; its completed verification job also had zero annotations. Existing annotations on historical runs are unchanged.
+
+Direct Azure checks confirm revision `opsflow-app--0000006` is the latest ready revision and `Healthy`, both container images use commit `f7b5fb106b7f87584c9372b0533fe7cebcde85f6`, and public API status is `UP`. These workflow maintenance changes do not establish the still-pending live broker failure/replay checks.
+
+References: [setup-java maintained versions](https://github.com/actions/setup-java), [setup-node maintained versions](https://github.com/actions/setup-node), [Ubuntu runner migration](https://github.com/actions/runner-images/issues/14748).
