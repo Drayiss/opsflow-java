@@ -103,7 +103,7 @@ If using the delivery off switch, set `AZURE_ENABLED` as a **repository** variab
 | `OIDC_SCOPE`            | Full OIDC + API scope string                |
 | `OIDC_AUTHORIZATION_AUDIENCE` | Auth0 API identifier; leave empty for the Entra example |
 
-Find infrastructure outputs with `az deployment group show -g opsflow-demo -n opsflow-infra --query properties.outputs`. Deployments use immutable commit SHA image tags and update both containers together. The pipeline does not re-provision infrastructure or rotate database credentials. Change infrastructure using Bicep/the provisioning script, and rerun it when changing API identity-provider settings.
+Find infrastructure outputs with `az deployment group show -g opsflow-demo -n opsflow-infra --query properties.outputs`. Deployments use immutable commit SHA image tags and update both containers together. Delivery succeeds only when both expected images are present, the latest revision is the ready revision and is healthy, and the public API returns `UP`. The pipeline does not re-provision infrastructure or rotate database credentials. Change infrastructure using Bicep/the provisioning script, and rerun it when changing API identity-provider settings.
 
 ## Acceptance and proof
 

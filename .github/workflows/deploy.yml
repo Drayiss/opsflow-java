@@ -99,13 +99,33 @@ jobs:
           $app | ConvertTo-Json -Depth 100 | Set-Content app.json
           az containerapp update -g $env:RESOURCE_GROUP -n $env:APP_NAME --yaml app.json -o none
           if ($LASTEXITCODE -ne 0) { throw 'Deployment failed' }
-      - name: Verify public health endpoint
-        shell: bash
+      - name: Verify deployed revision and public health
+        shell: pwsh
         env:
-          {
-            RESOURCE_GROUP: "${{ vars.AZURE_RESOURCE_GROUP }}",
-            APP_NAME: "${{ vars.AZURE_APP_NAME }}",
-          }
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          APP_NAME: ${{ vars.AZURE_APP_NAME }}
+          REGISTRY: ${{ env.ACR_NAME }}.azurecr.io
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          host=$(az containerapp show -g "$RESOURCE_GROUP" -n "$APP_NAME" --query properties.configuration.ingress.fqdn -o tsv)
-          curl --fail --retry 12 --retry-delay 10 --retry-all-errors "https://$host/api/health"
+          $ready = $false
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            $app = az containerapp show -g $env:RESOURCE_GROUP -n $env:APP_NAME -o json | ConvertFrom-Json
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot read deployed app' }
+            $containers = @($app.properties.template.containers)
+            $matching = @($containers | Where-Object { $_.name -in @('api', 'web') -and $_.image -eq "$($env:REGISTRY)/opsflow-$($_.name):$($env:IMAGE_TAG)" })
+            $revision = $app.properties.latestRevisionName
+            if ($matching.Count -eq 2 -and $revision -and $revision -eq $app.properties.latestReadyRevisionName) {
+              $state = az containerapp revision show -g $env:RESOURCE_GROUP -n $env:APP_NAME --revision $revision --query properties.healthState -o tsv
+              if ($LASTEXITCODE -ne 0) { throw 'Cannot read deployed revision' }
+              if ($state -eq 'Healthy') {
+                try {
+                  $url = "https://$($app.properties.configuration.ingress.fqdn)"
+                  $health = Invoke-RestMethod "$url/api/health" -TimeoutSec 15
+                  if ($health.status -eq 'UP') { $ready = $true; break }
+                } catch { }
+              }
+            }
+            Start-Sleep -Seconds 10
+          }
+          if (-not $ready) { throw 'The commit images did not become healthy in the published revision. Inspect Azure startup logs.' }
+          Write-Output "Deployed commit $($env:IMAGE_TAG): revision $revision is healthy at $url"
