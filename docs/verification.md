@@ -149,3 +149,9 @@ The agent did not change the user's queue permissions; an attempted automatic as
 ## User-reported live delivery to both members — October 10, 2026
 
 The user confirmed the `Two-member notification test` acceptance check: after creating the incident in the original organization and refreshing each Inbox, both the Administrator account and the second account (now a Responder) received exactly one Created notification for that incident. This records user-observed delivery to both current test members. It does not establish behavior under broker redelivery or prove delivery to additional members beyond those two accounts. Live duplicate-event replay and transient failure/retry checks remain pending; local automated coverage for transactional idempotency and consumer settlement is recorded above.
+
+## User-reported live duplicate-event acceptance — October 11, 2026
+
+The user completed the valid duplicate-event check with message `Duplicate delivery test`. They first sent a valid body referencing their test incident, observed one notification in each test account, then sent the unchanged body with a different broker message ID and confirmed each Inbox still contained exactly one matching notification after waiting and refreshing. Live organization, incident, and event identifiers are omitted from this public record.
+
+Distinct broker message IDs avoid broker duplicate suppression and exercise the consumer's body-event idempotency. This is user-observed live acceptance; the agent did not independently inspect broker deliveries or the database's processed-event record. Live transient failure/retry and recovery acceptance remains pending, along with direct hosted REST authorization checks and automatic Auth0 token-renewal verification.
